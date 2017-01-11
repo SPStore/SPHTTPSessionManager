@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="GHA-al-Qd7">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pf7-sy-Vjh">
+                                <rect key="frame" x="137.5" y="164" width="100" height="30"/>
+                                <color key="backgroundColor" red="0.071734371790000001" green="0.12675461139999999" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="2aB-XK-zf8"/>
+                                    <constraint firstAttribute="height" constant="30" id="BoF-3S-nQT"/>
+                                </constraints>
+                                <state key="normal" title="GET请求">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="get:" destination="BYZ-38-t0r" eventType="touchUpInside" id="WMx-YW-Lga"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sn7-hY-XFg">
+                                <rect key="frame" x="137.5" y="212" width="100" height="30"/>
+                                <color key="backgroundColor" red="0.071734371790000001" green="0.12675461139999999" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="POST请求">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="post:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KuY-jm-dUQ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dpi-29-9ET">
+                                <rect key="frame" x="137.5" y="262" width="100" height="30"/>
+                                <color key="backgroundColor" red="0.071734371790000001" green="0.12675461139999999" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="下载">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="download:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wme-cz-Buc"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="sn7-hY-XFg" firstAttribute="trailing" secondItem="Pf7-sy-Vjh" secondAttribute="trailing" id="2xa-MW-Z3t"/>
+                            <constraint firstItem="sn7-hY-XFg" firstAttribute="height" secondItem="Pf7-sy-Vjh" secondAttribute="height" id="6Nk-B1-aP1"/>
+                            <constraint firstItem="dpi-29-9ET" firstAttribute="height" secondItem="sn7-hY-XFg" secondAttribute="height" id="U6D-nu-stF"/>
+                            <constraint firstItem="Pf7-sy-Vjh" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="100" id="Xqj-vY-F7h"/>
+                            <constraint firstItem="dpi-29-9ET" firstAttribute="width" secondItem="sn7-hY-XFg" secondAttribute="width" id="b9x-b0-o1Q"/>
+                            <constraint firstItem="sn7-hY-XFg" firstAttribute="leading" secondItem="Pf7-sy-Vjh" secondAttribute="leading" id="bai-5E-6As"/>
+                            <constraint firstItem="dpi-29-9ET" firstAttribute="top" secondItem="sn7-hY-XFg" secondAttribute="bottom" constant="20" id="diO-QC-WeK"/>
+                            <constraint firstItem="dpi-29-9ET" firstAttribute="trailing" secondItem="sn7-hY-XFg" secondAttribute="trailing" id="dn0-eM-YKQ"/>
+                            <constraint firstItem="Pf7-sy-Vjh" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="qAp-lR-fvI"/>
+                            <constraint firstItem="dpi-29-9ET" firstAttribute="leading" secondItem="sn7-hY-XFg" secondAttribute="leading" id="rXQ-5w-Czm"/>
+                            <constraint firstItem="sn7-hY-XFg" firstAttribute="width" secondItem="Pf7-sy-Vjh" secondAttribute="width" id="vVB-n1-yjJ"/>
+                            <constraint firstItem="sn7-hY-XFg" firstAttribute="top" secondItem="Pf7-sy-Vjh" secondAttribute="bottom" constant="18" id="veD-0E-zWC"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="EgG-ks-F1u"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="676" y="-208.24587706146929"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="clk-25-0gD">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="GHA-al-Qd7" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Brn-c2-Uqc">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="Zaa-0S-uKP"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="W9h-D3-9gt" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-263.19999999999999" y="-208.24587706146929"/>
+        </scene>
+    </scenes>
+</document>

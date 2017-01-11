@@ -4,11 +4,14 @@
 
 下载功能说明：
 下载时，先调用downloadWithURL: progress: complete:方法，
-然后再用单例对象启动任务。
-[[SPHTTPSessionManager shareInstance] resumeTask]
+
+然后再用单例对象启动任务。[[SPHTTPSessionManager shareInstance] resumeTask]
+
 当然也可以通过下载方法downloadWithURL: progress: complete:获取返回值task，然后再用task启动任务。之所以提供单例对象启动任务的方法，是为了让开发者彻底面向我这个单例对象。
+
 暂停任务：
 [[SPHTTPSessionManager shareInstance] suspendTask]；
+
 取消任务
 [[SPHTTPSessionManager shareInstance] cancelTask]；
 

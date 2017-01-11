@@ -1,6 +1,6 @@
 //
-//  SPHTTPSessionTool.m
-//  SPHTTPSessionTool
+//  NetworkManager.m
+//  NetworkManager
 //
 //  Created by leshengping on 16/9/8.
 //  Copyright © 2016年 idress. All rights reserved.
@@ -26,6 +26,10 @@
     BOOL _downloadCompleted;
     BOOL _downloading;
 }
+
+@property (nonatomic, strong) AFHTTPSessionManager *manager;
+
+// ------------ 这些属性针对下载2， -------------
 /** session */
 @property (nonatomic, strong) NSURLSession *session;
 /** 写文件的流对象 */
@@ -43,7 +47,7 @@
 /** 存储文件信息的字典，该字典要写入沙盒 */
 @property (nonatomic, strong) NSMutableDictionary *fileInfoDictionry;
 
-// ------------ 上面的额属性是针对下载2，下面的属性针对下载1 -------------
+// ------------ 这些属性针对下载1， -------------
 /** 下载1的文件url地址 */
 @property (nonatomic, copy) NSString *downloadFromZero_UrlString;
 /** 下载1完成后保存的文件路径 */
@@ -66,16 +70,35 @@
     return manager;
 }
 
+- (instancetype)init {
+    if (self = [super init]) {
+        _requestTimeoutInterval = 30.0;  
+    }
+    return self;
+}
+
+- (AFHTTPSessionManager *)manager {
+    if (!_manager) {
+        _manager = [AFHTTPSessionManager manager];
+        _manager.requestSerializer.timeoutInterval = self.requestTimeoutInterval;
+    }
+    return _manager;
+}
+
+- (void)setRequestTimeoutInterval:(double)requestTimeoutInterval {
+    _requestTimeoutInterval = requestTimeoutInterval;
+    self.manager.requestSerializer.timeoutInterval = requestTimeoutInterval;
+}
+
 
 // get请求
-- (void)GET:(NSString *)urlString params:(NSDictionary *)params
+- (void)GET:(NSString *)urlString params:(nullable NSDictionary *)params
    success:(void (^)(id responseObject))success
    failure:(void (^)(NSError *error))failure {
     
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
+    self.manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
     
-    [manager GET:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    [self.manager GET:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         if (success) {
             success(responseObject);
@@ -88,13 +111,12 @@
 }
 
 // post请求
-- (void)POST:(NSString *)urlString params:(NSDictionary *)params
+- (void)POST:(NSString *)urlString params:(nonnull NSDictionary *)params
     success:(void (^)(id responseObject))success failure:(void (^)(NSError *error))failure{
     
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
+    self.manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
     
-    [manager POST:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    [self.manager POST:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         if (success) {
             success(responseObject);
         }
@@ -128,8 +150,6 @@
         // 将block参数赋值给全局block变量
         self.downloadProgressBlock = downloadProgressBlock;
         self.completionHandler = completionHandler;
-        
-        [self downloadFromZeroWithURL:urlString progress:downloadProgressBlock complete:completionHandler];
         
         return self.task;
     } else {

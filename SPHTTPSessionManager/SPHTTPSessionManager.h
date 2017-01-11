@@ -1,6 +1,6 @@
 //
-//  SPHTTPSessionTool.h
-//  SPHTTPSessionTool
+//  NetworkManager.h
+//  NetworkManager
 //
 //  Created by leshengping on 16/9/8.
 //  Copyright © 2016年 idress. All rights reserved.
@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param failure   请求失败回调的block
  */
 - (void)GET:(NSString *)urlString
-     params:(NSDictionary *)params
+     params:(nullable NSDictionary *)params
     success:(void (^)(id responseObject))success
     failure:(void (^)(NSError *error))failure;
 
@@ -54,7 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param failure   请求失败回调的block
  */
 - (void)POST:(NSString *)urlString
-      params:(NSDictionary *)params
+      params:(nonnull NSDictionary *)params
      success:(void (^)(id responseObject))success
      failure:(void (^)(NSError *error))failure;
 
@@ -84,9 +84,16 @@ NS_ASSUME_NONNULL_BEGIN
               success:(void (^)(id responseObject))success
               failure:(void (^)(NSError *error))failure;
 
+/*****************************  get、post相关  ***************************/
+
+/** 请求超时时间间隔,默认30s */
+@property (nonatomic, assign) double requestTimeoutInterval;
+
+/*****************************  下载相关  ***************************/
+
 // 以下这些操作在外界也可以另外做到，比如启动和暂停任务，外界在调用下载的方法时返回了一个task，开发者可以用该task去启动和暂停任务，之所以将其封装，一是：这个类能做到的尽量不让开发者去做，二是：让开发者完全面向我这个单例对象。开发者只需要做一些关于UI的事情
 
-// 下载方式
+/** 下载方式 */
 @property (nonatomic, assign) SPDownloadWay downloadway;
 
 /*

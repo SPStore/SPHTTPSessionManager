@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @complete 下载完成回调的block
  */
 - (NSURLSessionTask *)downloadWithURL:(NSString *)urlString
-                                     progress:(void (^)(CGFloat progress))downloadProgressBlock
+                                     progress:(void (^)(NSProgress *progress))downloadProgressBlock
                                      complete:(void (^)(NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler;
 
 /** 下载方式 */

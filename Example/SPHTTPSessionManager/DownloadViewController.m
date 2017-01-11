@@ -17,9 +17,7 @@
 @interface DownloadViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *downloadButton;
 @property (weak, nonatomic) IBOutlet UIProgressView *progressView;
-
-// 是否为蜂窝网络
-@property (nonatomic, assign,getter=isReachableViaWWAN) BOOL reachableViaWWAN;
+@property (weak, nonatomic) IBOutlet UILabel *promptLabel;
 
 @end
 
@@ -38,40 +36,22 @@
     // 下载
     [self download];
     
-    // 监测网络
-    [self monitoringNetwork];
 }
 
 
 /** 下载 */
 - (IBAction)downloadAction:(UIButton *)sender {
+    
+    
+    
     if (!sender.selected) {
-        
-        if (self.isReachableViaWWAN) {
-            
-            UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:@"您现在使用的是蜂窝移动网络，确定要下载吗？" message:nil preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                
-                [sender setTitle:@"暂停" forState:UIControlStateNormal];
-                // 启动任务
-                [NetworkManager resumeTask];
-            }];
-            
-            UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"算了吧" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            }];
-            [alertVc addAction:sureAction];
-            [alertVc addAction:cancelAction];
-            [self presentViewController:alertVc animated:YES completion:nil];
-            
-        } else {
-            [sender setTitle:@"暂停" forState:UIControlStateNormal];
-            // 启动任务
-            [NetworkManager resumeTask];
-        }
+        // 监测网络
+        [self monitoringNetwork];
 
     } else {
-        [sender setTitle:@"开始下载" forState:UIControlStateNormal];
+        
         [NetworkManager suspendTask];
+        [self.downloadButton setTitle:@"开始下载" forState:UIControlStateNormal];
     }
     
     sender.selected = !sender.selected;
@@ -94,13 +74,14 @@
 
 - (void)download {
     // 选择下载方式
-    NetworkManager.downloadway = SPDownloadWayRestart;
+    NetworkManager.downloadway = SPDownloadWayResume;
     
-     [NetworkManager downloadWithURL:SPFileURL progress:^(CGFloat progress) {
-        NSLog(@"progress:%f",progress);
+     [NetworkManager downloadWithURL:SPFileURL progress:^(NSProgress *progress) {
+        NSLog(@"progress:%lld",progress.completedUnitCount);
         // 下载进度,在主线程中更新UI
         dispatch_async(dispatch_get_main_queue(), ^(void){
-            self.progressView.progress = progress;
+            self.progressView.progress = 1.0 * progress.completedUnitCount / progress.totalUnitCount;
+            self.promptLabel.text = [NSString stringWithFormat:@"%.1fM/%.1fM",progress.completedUnitCount / (1000.0 * 1000.0),progress.totalUnitCount / (1000.0*1000.0)];
         });
         
     } complete:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
@@ -118,10 +99,14 @@
             });
             NSLog(@"下载完成");
         } else {
-            NSLog(@"error:%@",error);
-            NSLog(@"下载失败");
+            //NSLog(@"error:%@",error);
+            //NSLog(@"下载失败");
+            if ([error.domain isEqualToString:NSURLErrorDomain] && error.code == -1005 ) {
+                NSLog(@"网络断开了");
+               
+            }
             
-            [self.downloadButton setTitle:@"下载失败，继续下载" forState:UIControlStateNormal];
+            
         }
     }];
 }
@@ -131,16 +116,20 @@
         
         switch (state) {
             case SPNetworkReachabilityStateUnknown: // 未知网络
-                self.reachableViaWWAN = NO;
+                [self.downloadButton setTitle:@"暂停" forState:UIControlStateNormal];
+                [NetworkManager resumeTask];
                 break;
             case SPNetworkReachabilityStateNotReachabl:  // 没有网络
-                self.reachableViaWWAN = NO;
+                [self.downloadButton setTitle:@"开始下载" forState:UIControlStateNormal];
+                 self.promptLabel.text = @"网络断开了亲，请检查您的网络";
                 break;
             case SPNetworkReachabilityStateReachableViaWWAN:  // 蜂窝网络
-                self.reachableViaWWAN = YES;
+                // 蜂窝网络下是否继续下载
+                [self prompt3G4G_network];
                 break;
             case SPNetworkReachabilityStateReachableViaWiFi: // wifi
-                self.reachableViaWWAN = NO;
+                [self.downloadButton setTitle:@"暂停" forState:UIControlStateNormal];
+                [NetworkManager resumeTask];
                 break;
                 
             default:
@@ -149,6 +138,22 @@
     }];
     // 开始监测
     [NetworkManager startMonitoring];
+}
+
+- (void)prompt3G4G_network {
+    UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:@"您现在使用的是蜂窝移动网络，这可能会耗费您的流量，确定要下载吗？" message:nil preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self.downloadButton setTitle:@"暂停" forState:UIControlStateNormal];
+        // 启动任务
+        [NetworkManager resumeTask];
+    }];
+    
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"算了吧" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self.downloadButton setTitle:@"开始下载" forState:UIControlStateNormal];
+    }];
+    [alertVc addAction:sureAction];
+    [alertVc addAction:cancelAction];
+    [self presentViewController:alertVc animated:YES completion:nil];
 }
 
 - (void)didReceiveMemoryWarning {

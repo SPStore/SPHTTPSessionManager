@@ -41,7 +41,7 @@
 /** 文件的url */
 @property (nonatomic, strong) NSString *fileURLString;
 /** 下载过程中回调的block */
-@property (nonatomic, copy) void (^downloadProgressBlock)(CGFloat progress);
+@property (nonatomic, copy) void (^downloadProgressBlock)(NSProgress *progress);
 /** 下载完成回调的block */
 @property (nonatomic,copy) void (^completionHandler)(NSURLResponse *response, NSURL *URL, NSError *error);
 /** 存储文件信息的字典，该字典要写入沙盒 */
@@ -53,7 +53,7 @@
 /** 下载1完成后保存的文件路径 */
 @property (nonatomic, copy) NSString *downloadFromZero_filePath;
 /** 下载1过程中回调的block */
-@property (nonatomic, copy) void (^downloadFromZero_ProgressBlock)(CGFloat progress);
+@property (nonatomic, copy) void (^downloadFromZero_ProgressBlock)(NSProgress *progress);
 /** 下载1完成回调的block */
 @property (nonatomic,copy) void (^downloadFromZero_completionHandler)(NSURLResponse *response, NSURL *URL, NSError *error);
 
@@ -137,19 +137,21 @@
 #pragma mark - 下载
 // 下载1(重启app时从0开始开始)
 - (NSURLSessionTask *)downloadFromZeroWithURL:(NSString *)urlString
-                                     progress:(void (^)(CGFloat))downloadProgressBlock
+                                     progress:(void (^)(NSProgress *))downloadProgressBlock
                                      complete:(void (^)(NSURLResponse *, NSURL *, NSError *))completionHandler {
     
     self.downloadFromZero_UrlString = urlString;
     self.downloadFromZero_ProgressBlock = downloadProgressBlock;
     self.downloadFromZero_completionHandler = completionHandler;
+    
+    
   
     return self.task;
 }
 
 // 下载2(重启app时从上一次的数据开始)
 - (NSURLSessionTask *)downloadWithURL:(NSString *)urlString
-                                                   progress:(void (^)(CGFloat))downloadProgressBlock
+                                                   progress:(void (^)(NSProgress *))downloadProgressBlock
                                                    complete:(void (^)(NSURLResponse *, NSURL *, NSError *))completionHandler {
     if (self.downloadway == SPDownloadWayResume) {
         self.fileURLString = urlString;
@@ -204,10 +206,7 @@
 
 // 启动任务
 - (void)resumeTask {
-    if (self.downloadway == SPDownloadWayResume) {
-        // 这里之所以置为nil, 是因为在SPDownloadWayResume模式下，如果用户在下载时，切换了网络，此时无法继续下载，因为对于同一个task而言，tcp链接已经中断，所以为了能够重新创建一个任务，在这里置为nil
-        self.task = nil;
-    }
+
     [self.task resume];
 }
 
@@ -349,10 +348,8 @@
                 
                 _downloading = YES;
                 
-                CGFloat progress = 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount;
-                
                 if (self.downloadFromZero_ProgressBlock) {
-                    self.downloadFromZero_ProgressBlock(progress);
+                    self.downloadFromZero_ProgressBlock(downloadProgress);
                 }
                 
             } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
@@ -371,6 +368,7 @@
                 if (self.downloadFromZero_completionHandler) {
                     self.downloadFromZero_completionHandler(response,filePath,error);
                 }
+
             }];
         }
     }
@@ -420,13 +418,17 @@
     
     // 回调block
     if (self.downloadProgressBlock) {
-
-        // 获取进度值
-        CGFloat progress = 1.0 * SPDownloadLength / self.totalLength;
-        //NSLog(@"++++++%f",progress);
+        
+        NSProgress *progress = [[NSProgress alloc] init];
+        progress.completedUnitCount = SPDownloadLength;
+        progress.totalUnitCount = self.totalLength;
+        
         self.downloadProgressBlock(progress);
 
-        self.fileInfoDictionry[@"downloadProgress"] = @(progress);  // 进度值
+        // 获取进度值
+        CGFloat downloadProgress = 1.0 * SPDownloadLength / self.totalLength;
+        
+        self.fileInfoDictionry[@"downloadProgress"] = @(downloadProgress);  // 存储进度值
         self.fileInfoDictionry[@"downloading"] = @(YES); // 正在下载的标识
         [self.fileInfoDictionry writeToFile:SPFileInfoPath atomically:YES];
 

@@ -3,14 +3,17 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DownloadViewController">
             <connections>
+                <outlet property="accelerationLabel" destination="fhD-gc-VGc" id="EYS-Ce-oiS"/>
                 <outlet property="downloadButton" destination="hrf-sg-nKz" id="KlY-zK-0Oz"/>
                 <outlet property="progressView" destination="TMP-ix-DmI" id="aIX-gN-bwe"/>
                 <outlet property="promptLabel" destination="TAc-ir-esV" id="hJY-F7-yFb"/>
+                <outlet property="speedLabel" destination="66Z-JF-CXf" id="ch1-EP-Xwe"/>
                 <outlet property="view" destination="S6O-FV-5kZ" id="LH4-wZ-VPe"/>
             </connections>
         </placeholder>
@@ -43,7 +46,7 @@
                 </button>
                 <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TMP-ix-DmI">
                     <constraints>
-                        <constraint firstAttribute="width" constant="200" id="wW3-1V-uBR"/>
+                        <constraint firstAttribute="width" constant="300" id="wW3-1V-uBR"/>
                     </constraints>
                 </progressView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TAc-ir-esV">
@@ -54,6 +57,24 @@
                     <color key="textColor" red="1" green="0.2881504762880327" blue="0.21455161344455309" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fhD-gc-VGc">
+                    <constraints>
+                        <constraint firstAttribute="width" constant="50" id="D4H-cx-Pdv"/>
+                        <constraint firstAttribute="height" constant="21" id="YxV-U1-yvA"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" red="1" green="0.28815047630000001" blue="0.21455161340000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="66Z-JF-CXf">
+                    <constraints>
+                        <constraint firstAttribute="height" constant="21" id="sKT-Nf-idG"/>
+                        <constraint firstAttribute="width" constant="50" id="xBV-KY-WTd"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" red="1" green="0.28815047630000001" blue="0.21455161340000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
@@ -62,15 +83,19 @@
                 <constraint firstItem="TAc-ir-esV" firstAttribute="leading" secondItem="TMP-ix-DmI" secondAttribute="leading" id="GfX-4C-2Ks"/>
                 <constraint firstItem="X8Q-Dh-qcH" firstAttribute="height" secondItem="hrf-sg-nKz" secondAttribute="height" id="HLE-2G-T8u"/>
                 <constraint firstItem="TAc-ir-esV" firstAttribute="top" secondItem="TMP-ix-DmI" secondAttribute="bottom" constant="10" id="ImH-NE-V9Y"/>
-                <constraint firstItem="TAc-ir-esV" firstAttribute="trailing" secondItem="TMP-ix-DmI" secondAttribute="trailing" id="T7t-47-NN4"/>
+                <constraint firstItem="fhD-gc-VGc" firstAttribute="top" secondItem="TMP-ix-DmI" secondAttribute="bottom" constant="10" id="UYc-5L-nwa"/>
                 <constraint firstItem="X8Q-Dh-qcH" firstAttribute="top" secondItem="hrf-sg-nKz" secondAttribute="bottom" constant="43" id="Z0D-An-EvW"/>
                 <constraint firstItem="hrf-sg-nKz" firstAttribute="centerX" secondItem="S6O-FV-5kZ" secondAttribute="centerX" id="Z2Q-rK-AOi"/>
                 <constraint firstItem="X8Q-Dh-qcH" firstAttribute="leading" secondItem="hrf-sg-nKz" secondAttribute="leading" id="esM-Ft-GBf"/>
                 <constraint firstItem="TMP-ix-DmI" firstAttribute="centerX" secondItem="S6O-FV-5kZ" secondAttribute="centerX" id="jdj-jx-bNF"/>
+                <constraint firstItem="fhD-gc-VGc" firstAttribute="trailing" secondItem="TMP-ix-DmI" secondAttribute="trailing" id="jk2-HP-Xef"/>
                 <constraint firstItem="TMP-ix-DmI" firstAttribute="centerY" secondItem="S6O-FV-5kZ" secondAttribute="centerY" id="lfi-HP-oZ1"/>
+                <constraint firstItem="fhD-gc-VGc" firstAttribute="leading" secondItem="66Z-JF-CXf" secondAttribute="trailing" id="mRV-EC-lIn"/>
+                <constraint firstItem="66Z-JF-CXf" firstAttribute="top" secondItem="fhD-gc-VGc" secondAttribute="top" id="vjw-Zw-AIu"/>
+                <constraint firstItem="TAc-ir-esV" firstAttribute="width" secondItem="TMP-ix-DmI" secondAttribute="width" multiplier="0.5" id="wPw-dM-0QE"/>
                 <constraint firstItem="hrf-sg-nKz" firstAttribute="top" secondItem="S6O-FV-5kZ" secondAttribute="top" constant="100" id="zWj-Uw-Gpr"/>
             </constraints>
-            <point key="canvasLocation" x="-1549" y="60"/>
+            <point key="canvasLocation" x="-1549.5" y="59.5"/>
         </view>
     </objects>
 </document>

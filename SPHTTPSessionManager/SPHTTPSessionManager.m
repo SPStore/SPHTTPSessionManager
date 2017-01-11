@@ -61,6 +61,8 @@
 
 @implementation SPHTTPSessionManager
 
+#pragma mark -  初始化
+
 + (instancetype)shareInstance {
     static SPHTTPSessionManager *manager = nil;
     static dispatch_once_t onceToken;
@@ -85,13 +87,16 @@
     return _manager;
 }
 
+#pragma mark -
+
 - (void)setRequestTimeoutInterval:(double)requestTimeoutInterval {
     _requestTimeoutInterval = requestTimeoutInterval;
     self.manager.requestSerializer.timeoutInterval = requestTimeoutInterval;
 }
 
 
-// get请求
+#pragma mark - GET
+
 - (void)GET:(NSString *)urlString params:(nullable NSDictionary *)params
    success:(void (^)(id responseObject))success
    failure:(void (^)(NSError *error))failure {
@@ -110,7 +115,8 @@
     }];
 }
 
-// post请求
+#pragma mark - POST
+
 - (void)POST:(NSString *)urlString params:(nonnull NSDictionary *)params
     success:(void (^)(id responseObject))success failure:(void (^)(NSError *error))failure{
     
@@ -128,6 +134,7 @@
     
 }
 
+#pragma mark - 下载
 // 下载1(重启app时从0开始开始)
 - (NSURLSessionTask *)downloadFromZeroWithURL:(NSString *)urlString
                                      progress:(void (^)(CGFloat))downloadProgressBlock
@@ -158,7 +165,8 @@
 }
 
 
-// 上传
+#pragma mark - 上传
+
 - (void)uploadWithURL:(NSString *)urlString
               params:(NSDictionary *)params
             fileData:(NSData *)filedata
@@ -192,8 +200,14 @@
     }];
 }
 
+#pragma mark - public
+
 // 启动任务
 - (void)resumeTask {
+    if (self.downloadway == SPDownloadWayResume) {
+        // 这里之所以置为nil, 是因为在SPDownloadWayResume模式下，如果用户在下载时，切换了网络，此时无法继续下载，因为对于同一个task而言，tcp链接已经中断，所以为了能够重新创建一个任务，在这里置为nil
+        self.task = nil;
+    }
     [self.task resume];
 }
 
@@ -269,6 +283,8 @@
     }
     
 }
+
+#pragma mark -  getter
 
 // 从沙盒中获取下载的进度值
 - (CGFloat)storedDownloadProgress {
@@ -443,6 +459,56 @@
         }
     }
     
+}
+
+#pragma mark - 网络监测
+
+- (void)setReachabilityStatusChangeHandle:(void (^)(SPNetworkReachabilityState))handel {
+    // 1.获得网络监控的管理者
+    AFNetworkReachabilityManager *mgr = [AFNetworkReachabilityManager sharedManager];
+    
+    // 2.设置网络状态改变后的处理
+    [mgr setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        // 当网络状态改变了, 就会调用这个block
+        
+        switch (status) {
+            case AFNetworkReachabilityStatusUnknown: // 未知网络
+                if (handel) {
+                    handel(SPNetworkReachabilityStateUnknown);
+                }
+                NSLog(@"未知网络");
+                break;
+                
+            case AFNetworkReachabilityStatusNotReachable: // 没有网络(断网)
+                if (handel) {
+                    handel(SPNetworkReachabilityStateNotReachabl);
+                }
+                NSLog(@"没有网络(断网)");
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWWAN: // 蜂窝网络
+                if (handel) {
+                    handel(SPNetworkReachabilityStateReachableViaWWAN);
+                }
+                NSLog(@"蜂窝网络");
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWiFi: // WIFI
+                if (handel) {
+                    handel(SPNetworkReachabilityStateReachableViaWiFi);
+                }
+                NSLog(@"WiFi");
+                break;
+        }
+    }];
+}
+
+- (void)startMonitoring {
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+}
+
+- (void)stopMonitoring {
+    [[AFNetworkReachabilityManager sharedManager] stopMonitoring];
 }
 
 @end

@@ -1,6 +1,6 @@
 //
-//  SPHTTPSessionTool.m
-//  SPHTTPSessionTool
+//  NetworkManager.m
+//  NetworkManager
 //
 //  Created by leshengping on 16/9/8.
 //  Copyright © 2016年 idress. All rights reserved.
@@ -26,6 +26,10 @@
     BOOL _downloadCompleted;
     BOOL _downloading;
 }
+
+@property (nonatomic, strong) AFHTTPSessionManager *manager;
+
+// ------------ 这些属性针对下载2， -------------
 /** session */
 @property (nonatomic, strong) NSURLSession *session;
 /** 写文件的流对象 */
@@ -43,7 +47,7 @@
 /** 存储文件信息的字典，该字典要写入沙盒 */
 @property (nonatomic, strong) NSMutableDictionary *fileInfoDictionry;
 
-// ------------ 上面的额属性是针对下载2，下面的属性针对下载1 -------------
+// ------------ 这些属性针对下载1， -------------
 /** 下载1的文件url地址 */
 @property (nonatomic, copy) NSString *downloadFromZero_UrlString;
 /** 下载1完成后保存的文件路径 */
@@ -57,6 +61,8 @@
 
 @implementation SPHTTPSessionManager
 
+#pragma mark -  初始化
+
 + (instancetype)shareInstance {
     static SPHTTPSessionManager *manager = nil;
     static dispatch_once_t onceToken;
@@ -66,16 +72,38 @@
     return manager;
 }
 
+- (instancetype)init {
+    if (self = [super init]) {
+        _requestTimeoutInterval = 30.0;  
+    }
+    return self;
+}
 
-// get请求
-- (void)GET:(NSString *)urlString params:(NSDictionary *)params
+- (AFHTTPSessionManager *)manager {
+    if (!_manager) {
+        _manager = [AFHTTPSessionManager manager];
+        _manager.requestSerializer.timeoutInterval = self.requestTimeoutInterval;
+    }
+    return _manager;
+}
+
+#pragma mark -
+
+- (void)setRequestTimeoutInterval:(double)requestTimeoutInterval {
+    _requestTimeoutInterval = requestTimeoutInterval;
+    self.manager.requestSerializer.timeoutInterval = requestTimeoutInterval;
+}
+
+
+#pragma mark - GET
+
+- (void)GET:(NSString *)urlString params:(nullable NSDictionary *)params
    success:(void (^)(id responseObject))success
    failure:(void (^)(NSError *error))failure {
     
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
+    self.manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
     
-    [manager GET:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    [self.manager GET:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         if (success) {
             success(responseObject);
@@ -87,14 +115,14 @@
     }];
 }
 
-// post请求
-- (void)POST:(NSString *)urlString params:(NSDictionary *)params
+#pragma mark - POST
+
+- (void)POST:(NSString *)urlString params:(nonnull NSDictionary *)params
     success:(void (^)(id responseObject))success failure:(void (^)(NSError *error))failure{
     
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
+    self.manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/plain",@"application/json",@"text/json",@"text/javascript",@"text/html", nil];
     
-    [manager POST:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    [self.manager POST:urlString parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         if (success) {
             success(responseObject);
         }
@@ -106,6 +134,7 @@
     
 }
 
+#pragma mark - 下载
 // 下载1(重启app时从0开始开始)
 - (NSURLSessionTask *)downloadFromZeroWithURL:(NSString *)urlString
                                      progress:(void (^)(CGFloat))downloadProgressBlock
@@ -129,8 +158,6 @@
         self.downloadProgressBlock = downloadProgressBlock;
         self.completionHandler = completionHandler;
         
-        [self downloadFromZeroWithURL:urlString progress:downloadProgressBlock complete:completionHandler];
-        
         return self.task;
     } else {
         return [self downloadFromZeroWithURL:urlString progress:downloadProgressBlock complete:completionHandler];
@@ -138,7 +165,8 @@
 }
 
 
-// 上传
+#pragma mark - 上传
+
 - (void)uploadWithURL:(NSString *)urlString
               params:(NSDictionary *)params
             fileData:(NSData *)filedata
@@ -172,8 +200,14 @@
     }];
 }
 
+#pragma mark - public
+
 // 启动任务
 - (void)resumeTask {
+    if (self.downloadway == SPDownloadWayResume) {
+        // 这里之所以置为nil, 是因为在SPDownloadWayResume模式下，如果用户在下载时，切换了网络，此时无法继续下载，因为对于同一个task而言，tcp链接已经中断，所以为了能够重新创建一个任务，在这里置为nil
+        self.task = nil;
+    }
     [self.task resume];
 }
 
@@ -249,6 +283,8 @@
     }
     
 }
+
+#pragma mark -  getter
 
 // 从沙盒中获取下载的进度值
 - (CGFloat)storedDownloadProgress {
@@ -423,6 +459,56 @@
         }
     }
     
+}
+
+#pragma mark - 网络监测
+
+- (void)setReachabilityStatusChangeHandle:(void (^)(SPNetworkReachabilityState))handel {
+    // 1.获得网络监控的管理者
+    AFNetworkReachabilityManager *mgr = [AFNetworkReachabilityManager sharedManager];
+    
+    // 2.设置网络状态改变后的处理
+    [mgr setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        // 当网络状态改变了, 就会调用这个block
+        
+        switch (status) {
+            case AFNetworkReachabilityStatusUnknown: // 未知网络
+                if (handel) {
+                    handel(SPNetworkReachabilityStateUnknown);
+                }
+                NSLog(@"未知网络");
+                break;
+                
+            case AFNetworkReachabilityStatusNotReachable: // 没有网络(断网)
+                if (handel) {
+                    handel(SPNetworkReachabilityStateNotReachabl);
+                }
+                NSLog(@"没有网络(断网)");
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWWAN: // 蜂窝网络
+                if (handel) {
+                    handel(SPNetworkReachabilityStateReachableViaWWAN);
+                }
+                NSLog(@"蜂窝网络");
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWiFi: // WIFI
+                if (handel) {
+                    handel(SPNetworkReachabilityStateReachableViaWiFi);
+                }
+                NSLog(@"WiFi");
+                break;
+        }
+    }];
+}
+
+- (void)startMonitoring {
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+}
+
+- (void)stopMonitoring {
+    [[AFNetworkReachabilityManager sharedManager] stopMonitoring];
 }
 
 @end

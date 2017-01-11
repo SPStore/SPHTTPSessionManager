@@ -26,11 +26,21 @@ typedef NS_ENUM(NSInteger, SPDownloadWay) {
     
 };
 
+typedef NS_ENUM(NSInteger, SPNetworkReachabilityState){
+    SPNetworkReachabilityStateUnknown = -1,             // 未知网络
+    SPNetworkReachabilityStateNotReachabl = 0,          // 没有网络
+    SPNetworkReachabilityStateReachableViaWWAN = 1,     // 蜂窝网络
+    SPNetworkReachabilityStateReachableViaWiFi = 2      // WiFi
+};
+
 NS_ASSUME_NONNULL_BEGIN
 @interface SPHTTPSessionManager : NSObject
 
 /** 单例对象 */
 + (instancetype)shareInstance;
+
+
+/*****************************  get、post相关  ***************************/
 
 /**
  *  get请求
@@ -58,6 +68,12 @@ NS_ASSUME_NONNULL_BEGIN
      success:(void (^)(id responseObject))success
      failure:(void (^)(NSError *error))failure;
 
+/** 请求超时时间间隔,默认30s */
+@property (nonatomic, assign) double requestTimeoutInterval;
+
+
+/*****************************  下载相关  *******************************/
+
 /**
  *  下载
  *
@@ -69,6 +85,44 @@ NS_ASSUME_NONNULL_BEGIN
                                      progress:(void (^)(CGFloat progress))downloadProgressBlock
                                      complete:(void (^)(NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler;
 
+/** 下载方式 */
+@property (nonatomic, assign) SPDownloadWay downloadway;
+
+/*
+ *  启动任务
+ *
+ */
+- (void)resumeTask;
+/*
+ *  暂停任务
+ *
+ */
+- (void)suspendTask;
+/*
+ *  取消任务
+ *
+ */
+- (void)cancelTask;
+
+/*
+ *  移除已经下载好的文件数据
+ *
+ */
+- (BOOL)removeDownloadedData:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+/** 是否正在下载,对于SPDownloadResume下载方式，该属性来源于沙盒，对于SPDownloadRestart下载方式，该属性来源于内存 */
+@property (nonatomic, assign, readonly, getter=isDownloading) BOOL downloading;
+
+
+// 以下两个属性只对SPDownloadResume下载方式奏效
+
+/** 保存在沙盒中的进度值 */
+@property (nonatomic, assign, readonly) CGFloat storedDownloadProgress;
+/** 是否已经下载完毕 */
+@property (nonatomic, assign, readonly, getter=isDownloadCompleted) BOOL downloadCompleted;
+
+
+/*****************************  上传相关  *******************************/
 
 /*
  * 上传  http://www.cnblogs.com/qingche/p/5489434.html
@@ -84,50 +138,26 @@ NS_ASSUME_NONNULL_BEGIN
               success:(void (^)(id responseObject))success
               failure:(void (^)(NSError *error))failure;
 
-/*****************************  get、post相关  ***************************/
 
-/** 请求超时时间间隔,默认30s */
-@property (nonatomic, assign) double requestTimeoutInterval;
 
-/*****************************  下载相关  ***************************/
+/*****************************  网络监测相关  *******************************/
 
-// 以下这些操作在外界也可以另外做到，比如启动和暂停任务，外界在调用下载的方法时返回了一个task，开发者可以用该task去启动和暂停任务，之所以将其封装，一是：这个类能做到的尽量不让开发者去做，二是：让开发者完全面向我这个单例对象。开发者只需要做一些关于UI的事情
-
-/** 下载方式 */
-@property (nonatomic, assign) SPDownloadWay downloadway;
-
-/*
- *  启动任务
+/** 
+ *  监测网络
+ *  @param handel 监测到网络或网络发生改变时回调的block
  *
  */
-- (void)resumeTask;
-/* 
- *  暂停任务
+- (void)setReachabilityStatusChangeHandle:(void (^)(SPNetworkReachabilityState state))handel;
+/**
+ *  开始检测
  *
  */
-- (void)suspendTask;
-/*
- *  取消任务
+- (void)startMonitoring;
+/**
+ *  停止检测
  *
  */
-- (void)cancelTask;
-
-/*
- *  移除已经下载好的文件数据 
- *
- */
-- (BOOL)removeDownloadedData:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
-/** 是否正在下载,对于SPDownloadResume下载方式，该属性来源于沙盒，对于SPDownloadRestart下载方式，该属性来源于内存 */
-@property (nonatomic, assign, readonly, getter=isDownloading) BOOL downloading;
-
-
-// 以下两个属性只对SPDownloadResume下载方式奏效
-
-/** 保存在沙盒中的进度值 */
-@property (nonatomic, assign, readonly) CGFloat storedDownloadProgress;
-/** 是否已经下载完毕 */
-@property (nonatomic, assign, readonly, getter=isDownloadCompleted) BOOL downloadCompleted;
+- (void)stopMonitoring;
 
 @end
 NS_ASSUME_NONNULL_END

@@ -489,6 +489,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SXULSRC6Y5;
 				INFOPLIST_FILE = SPHTTPSessionManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.idresschina.SPHTTPSessionManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -501,6 +502,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SXULSRC6Y5;
 				INFOPLIST_FILE = SPHTTPSessionManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.idresschina.SPHTTPSessionManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -576,6 +578,7 @@
 				09F5A4301E25C9EA0090C5A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		09F5A4311E25C9EA0090C5A2 /* Build configuration list for PBXNativeTarget "SPHTTPSessionManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -584,6 +587,7 @@
 				09F5A4331E25C9EA0090C5A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		09F5A4341E25C9EA0090C5A2 /* Build configuration list for PBXNativeTarget "SPHTTPSessionManagerUITests" */ = {
 			isa = XCConfigurationList;
@@ -592,6 +596,7 @@
 				09F5A4361E25C9EA0090C5A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
